@@ -1,0 +1,13 @@
+@model ASPVUE.Models.User
+
+@{
+    ViewData["Title"] = "Login";
+    Layout = "_LayoutHome";
+}
+
+<form asp-action="AsyncLogin" method="post" class="d-none">
+    <input type="text" asp-for="Username">
+    <input type="text" asp-for="Password">
+</form>
+<div id="app"></div>
+<script src=@Url.Content("~/bundle/home/home.js")></script>

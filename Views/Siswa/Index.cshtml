@@ -1,0 +1,10 @@
+﻿@{
+    ViewData["Title"] = "Daftar Siswa";
+}
+<div id="app"></div>
+<script>
+    let token = `@ViewData["TokenValue"]`;
+    let role = `@ViewData["Role"]`;
+</script>
+
+<script src=@Url.Content("~/bundle/daftarSiswa/daftarSiswa.js")></script> 
