@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using ASPVUE.Constants;
 using ASPVUE.Data;
 using ASPVUE.Models;
 
@@ -13,9 +12,9 @@ namespace ASPVUE.Process.RoleProcess
         public WaliKelasRoleProcess(ApplicationDbContext context) : base(context)
         {
         }
-        public async override Task<List<Siswa>> GetAllSiswa()
+        public async Task<List<Siswa>> GetAllSiswa(int idWaliKelas)
         {
-            var waliKelas = await _waliKelasProcess.GetIdByUserID(UserAuth.UserID);
+            var waliKelas = await _waliKelasProcess.GetIdByUserID(idWaliKelas);
             var kelas = await _kelasProcess.GetIdByWaliKelasID(waliKelas.WaliKelasID);
             var siswa = await _kelasProcess.GetListSiswaInKelas(kelas.KelasID);
             return siswa;

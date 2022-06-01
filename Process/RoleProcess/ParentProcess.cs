@@ -28,7 +28,7 @@ namespace ASPVUE.Process.RoleProcess
         }
 
         // Siswa
-        public async virtual Task<List<Siswa>> GetAllSiswa()
+        public async Task<List<Siswa>> GetAllSiswa()
         {
             return await _siswaProcess.GetAllSiswa();
         }

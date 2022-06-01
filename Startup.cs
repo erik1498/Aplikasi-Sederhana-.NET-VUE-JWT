@@ -13,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Session;
 
 namespace ASPVUE
 {
@@ -29,7 +30,7 @@ namespace ASPVUE
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
-            services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DatabaseSimona")));
+            services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DatabaseSimonaHosting")));
             services.AddDatabaseDeveloperPageExceptionFilter();
             
             var Key = Encoding.UTF8.GetBytes(Configuration["JWT:Key"]);
@@ -47,6 +48,8 @@ namespace ASPVUE
                     IssuerSigningKey = new SymmetricSecurityKey(Key)
                 };
             });
+            services.AddDistributedMemoryCache();
+            services.AddSession();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -64,7 +67,7 @@ namespace ASPVUE
             }
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
+            app.UseSession();
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();

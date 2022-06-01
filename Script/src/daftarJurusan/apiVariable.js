@@ -1,5 +1,6 @@
-function baseSiswa(url = '') {
-    return "https://localhost:5001/Jurusan/" + url;
+import BaseUrl from "../BaseUrl";
+function baseJurusan(url = '') {
+    return `${BaseUrl}/Jurusan/${url}`;
 }
 
-export default baseSiswa;
+export default baseJurusan;

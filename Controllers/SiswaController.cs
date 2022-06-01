@@ -8,10 +8,10 @@ using Microsoft.Extensions.Logging;
 using ASPVUE.Models;
 using ASPVUE.Data;
 using ASPVUE.Rules.Input;
-using ASPVUE.Constants;
 using Microsoft.AspNetCore.Authorization;
 using ASPVUE.Process.RoleProcess;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
 
 namespace ASPVUE.Controllers
 {
@@ -29,153 +29,196 @@ namespace ASPVUE.Controllers
             _waliKelasProcess = new WaliKelasRoleProcess(context);
         }
 
-        private void AuthorizeRequest(){
+        private bool AuthorizeRequest()
+        {
             var identity = HttpContext.User.Identity as ClaimsIdentity;
             if (identity != null)
             {
                 var userClaims = identity.Claims;
-                UserAuth.UserID = int.Parse(userClaims.FirstOrDefault(o => o.Type == ClaimTypes.PrimaryGroupSid).Value);
-                UserAuth.Username = userClaims.FirstOrDefault(o => o.Type == ClaimTypes.NameIdentifier).Value.ToString();
-                UserAuth.Role = int.Parse(userClaims.FirstOrDefault(o => o.Type == ClaimTypes.Role).Value);
+                string UserID = userClaims.FirstOrDefault(o => o.Type == ClaimTypes.PrimaryGroupSid).Value;
+                string Username = userClaims.FirstOrDefault(o => o.Type == ClaimTypes.NameIdentifier).Value;
+                int Role = int.Parse(userClaims.FirstOrDefault(o => o.Type == ClaimTypes.Role).Value);
+                if (HttpContext.Session.GetString("UserID") != UserID && HttpContext.Session.GetString("Username") != Username && int.Parse(HttpContext.Session.GetString("Role")) != Role)
+                {
+                    return false;
+                }
+                return true;
             }
+            return false;
         }
 
         public IActionResult Index()
         {
-            if (TokenConst.TokenValue == string.Empty)
+            string tokenValue = HttpContext.Session.GetString("TokenValue");
+            if (string.IsNullOrWhiteSpace(tokenValue))
             {
                 return RedirectToAction("Index", "Home");
             }
-            ViewData["TokenValue"] = TokenConst.TokenValue;
-            ViewData["Role"] = UserAuth.Role;
+            ViewData["TokenValue"] = tokenValue;
+            ViewData["Role"] = HttpContext.Session.GetString("Role");
             return View();
         }
 
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> GetDaftarSiswa(){
-            this.AuthorizeRequest();
-            if (UserAuth.Role == 1)
+            var auth = this.AuthorizeRequest();
+            if (auth)
             {
-                return Ok(Newtonsoft.Json.JsonConvert.SerializeObject(await _adminProcess.GetAllSiswa()));   
+                if (int.Parse(HttpContext.Session.GetString("Role")) == 1)
+                {
+                    return Ok(Newtonsoft.Json.JsonConvert.SerializeObject(await _adminProcess.GetAllSiswa()));   
+                }
+                else if(int.Parse(HttpContext.Session.GetString("Role")) == 2){
+                    return Ok(Newtonsoft.Json.JsonConvert.SerializeObject(await _waliKelasProcess.GetAllSiswa(int.Parse(HttpContext.Session.GetString("UserID")))));   
+                }
+                return BadRequest("Akun Anda Tidak Diizinkan.");
             }
-            else if(UserAuth.Role == 2){
-                return Ok(Newtonsoft.Json.JsonConvert.SerializeObject(await _waliKelasProcess.GetAllSiswa()));   
-            }
-            return BadRequest("Akun Anda Tidak Diizinkan.");
+            return Unauthorized();
         }
 
         [HttpPost]
         [Authorize]
         public async Task<IActionResult> Create(Siswa siswa){
-            this.AuthorizeRequest();
-            if (UserAuth.Role == 1)
+            var auth = this.AuthorizeRequest();
+            if (auth)
             {
-                if (ModelState.IsValid){
-                    return Ok(Newtonsoft.Json.JsonConvert.SerializeObject(await _adminProcess.AddSiswa(siswa)));
+                if (int.Parse(HttpContext.Session.GetString("Role")) == 1)
+                {
+                    if (ModelState.IsValid){
+                        return Ok(Newtonsoft.Json.JsonConvert.SerializeObject(await _adminProcess.AddSiswa(siswa)));
+                    }
+                    return BadRequest(Newtonsoft.Json.JsonConvert.SerializeObject(ModelState));   
                 }
-                return BadRequest(Newtonsoft.Json.JsonConvert.SerializeObject(ModelState));   
+                return BadRequest("Akun Anda Tidak Diizinkan.");
             }
-            return BadRequest("Akun Anda Tidak Diizinkan.");
+            return Unauthorized();
+
         }
 
         [HttpPost]
         [Authorize]
         public async Task<IActionResult> Search(Siswa siswa){
-            this.AuthorizeRequest();
-            if (UserAuth.Role == 1 || UserAuth.Role == 2)
+            var auth = this.AuthorizeRequest();
+            if (auth)
             {
-                if (siswa.NamaSiswa != string.Empty)
+                if (int.Parse(HttpContext.Session.GetString("Role")) == 1 || int.Parse(HttpContext.Session.GetString("Role")) == 2)
                 {
-                    var exist = await _adminProcess.SearchSiswa(siswa);
-                    if (exist != null)
+                    if (siswa.NamaSiswa != string.Empty)
                     {
-                        return Ok(Newtonsoft.Json.JsonConvert.SerializeObject(exist));
+                        var exist = await _adminProcess.SearchSiswa(siswa);
+                        if (exist != null)
+                        {
+                            return Ok(Newtonsoft.Json.JsonConvert.SerializeObject(exist));
+                        }
+                        else{
+                            return NotFound();
+                        }
+                    }else{
+                        return BadRequest();
                     }
-                    else{
-                        return NotFound();
-                    }
-                }else{
-                    return BadRequest();
                 }
+                return BadRequest("Akun Anda Tidak Diizinkan");
             }
-            return BadRequest("Akun Anda Tidak Diizinkan");
+            return Unauthorized();
         }
 
         [HttpPut]
+        [Authorize]
         public async Task<IActionResult> Edit(Siswa siswa){
-            if (ModelState.IsValid)
+            var auth = this.AuthorizeRequest();
+            if (auth)
             {
-                var exist = await _adminProcess.EditSiswa(siswa);
-                if (exist != null)
+                if (ModelState.IsValid)
                 {
-                    return Ok(exist);
+                    var exist = await _adminProcess.EditSiswa(siswa);
+                    if (exist != null)
+                    {
+                        return Ok(exist);
+                    }
                 }
+                return BadRequest(Newtonsoft.Json.JsonConvert.SerializeObject(ModelState));
             }
-            return BadRequest(Newtonsoft.Json.JsonConvert.SerializeObject(ModelState));
+            return Unauthorized();
         }
 
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> GetSiswa(int id){
-            this.AuthorizeRequest();
-            if (UserAuth.Role == 1)
+            var auth = this.AuthorizeRequest();
+            if (auth)
             {
-                var exist = await _adminProcess.GetIdSiswa(id);
-                if (exist != null)
+                if (int.Parse(HttpContext.Session.GetString("Role")) == 1)
                 {
-                    return Ok(Newtonsoft.Json.JsonConvert.SerializeObject(exist));
-                }else{
-                    return NotFound();
+                    var exist = await _adminProcess.GetIdSiswa(id);
+                    if (exist != null)
+                    {
+                        return Ok(Newtonsoft.Json.JsonConvert.SerializeObject(exist));
+                    }else{
+                        return NotFound();
+                    }
                 }
+                return BadRequest("Akun Anda Tidak Diizinkan");
             }
-            return BadRequest("Akun Anda Tidak Diizinkan");
+            return Unauthorized();
         }
 
         [HttpDelete]
         [Authorize]
         public async Task<IActionResult> Delete(int id){
-            this.AuthorizeRequest();
-            if (UserAuth.Role == 1)
+            var auth = this.AuthorizeRequest();
+            if (auth)
             {
-                var exist = await _adminProcess.DeleteSiswa(id);
-                if (exist)
+                if (int.Parse(HttpContext.Session.GetString("Role")) == 1)
                 {
-                    return NoContent();
-                }else{
-                    return NotFound();
+                    var exist = await _adminProcess.DeleteSiswa(id);
+                    if (exist)
+                    {
+                        return NoContent();
+                    }else{
+                        return NotFound();
+                    }
                 }
+                return BadRequest("Akun Anda Tidak Diizinkan");
             }
-            return BadRequest("Akun Anda Tidak Diizinkan");
+            return Unauthorized();
         }
 
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> GetSiswaTanpaKelas(){
-            this.AuthorizeRequest();
-            if (UserAuth.Role == 1)
+            var auth = this.AuthorizeRequest();
+            if (auth)
             {
-                var siswa = await _adminProcess.GetSiswaTanpaKelas();
-                if (siswa != null)
+                if (int.Parse(HttpContext.Session.GetString("Role")) == 1)
                 {
-                    return Ok(Newtonsoft.Json.JsonConvert.SerializeObject(siswa));
-                }else{
-                    return NotFound();
+                    var siswa = await _adminProcess.GetSiswaTanpaKelas();
+                    if (siswa != null)
+                    {
+                        return Ok(Newtonsoft.Json.JsonConvert.SerializeObject(siswa));
+                    }else{
+                        return NotFound();
+                    }
                 }
+                return BadRequest("Akun Anda Tidak Diizinkan");
             }
-            return BadRequest("Akun Anda Tidak Diizinkan");
+            return Unauthorized();
         }
 
         [HttpPut]
         [Authorize]
         public async Task<IActionResult> SetKelas(SetKelas setKelas){
-            this.AuthorizeRequest();
-            if (UserAuth.Role == 1)
+            var auth = this.AuthorizeRequest();
+            if (auth)
             {
-                await _adminProcess.SetKelasSiswa(setKelas);
-                return NoContent();
+                if (int.Parse(HttpContext.Session.GetString("Role")) == 1)
+                {
+                    await _adminProcess.SetKelasSiswa(setKelas);
+                    return NoContent();
+                }
+                return BadRequest("Akun Anda Tidak Diizinkan");
             }
-            return BadRequest("Akun Anda Tidak Diizinkan");
+            return Unauthorized();
         }
         
 

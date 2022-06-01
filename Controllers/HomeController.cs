@@ -6,7 +6,6 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using ASPVUE.Constants;
 using ASPVUE.Data;
 using ASPVUE.Models;
 using ASPVUE.Rules;
@@ -17,6 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Http;
 
 namespace ASPVUE.Controllers
 {
@@ -35,7 +35,8 @@ namespace ASPVUE.Controllers
 
         public IActionResult Index()
         {
-            if (TokenConst.TokenValue != string.Empty)
+            string tokenValue = HttpContext.Session.GetString("TokenValue");
+            if (!string.IsNullOrWhiteSpace(tokenValue))
             {
                 return RedirectToAction("Index", "Siswa");
             }
@@ -65,10 +66,10 @@ namespace ASPVUE.Controllers
                 if (exist != null)
                 {
                     var token = this.GenerateToken(exist);
-                    TokenConst.TokenValue = token;
-                    UserAuth.UserID = exist.UserID;
-                    UserAuth.Username = exist.Username;
-                    UserAuth.Role = exist.Role;
+                    HttpContext.Session.SetString("TokenValue", token);
+                    HttpContext.Session.SetString("UserID", exist.UserID.ToString());
+                    HttpContext.Session.SetString("Username", exist.Username);
+                    HttpContext.Session.SetString("Role", exist.Role.ToString());
                     if (exist.Role == 1)
                     {
                         return RedirectToAction("Index", "Siswa");
@@ -87,7 +88,7 @@ namespace ASPVUE.Controllers
         [HttpGet]
         public IActionResult Logout()
         {
-            TokenConst.TokenValue = string.Empty;
+            HttpContext.Session.Clear();
             return RedirectToAction("Index");
         }
 

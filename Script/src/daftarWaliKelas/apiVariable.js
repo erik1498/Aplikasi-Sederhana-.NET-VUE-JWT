@@ -1,5 +1,7 @@
+import BaseUrl from "../BaseUrl";
+
 function baseWaliKelas(url = '') {
-    return "https://localhost:5001/WaliKelas/" + url;
+    return `${BaseUrl}/Jurusan/${url}`;
 }
 
 export default baseWaliKelas;

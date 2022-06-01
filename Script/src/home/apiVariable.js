@@ -1,5 +1,7 @@
+import BaseUrl from "../BaseUrl";
+
 function baseHome(url = '') {
-    return "https://localhost:5001/Home/" + url;
+    return `${BaseUrl}/Home/${url}`;
 }
 
 export default baseHome;

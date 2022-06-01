@@ -1,6 +1,4 @@
-﻿@using ASPVUE.Constants
-
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -29,11 +27,11 @@
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Siswa" asp-action="Index">Siswa</a>
-                        </li>
-                        @if (UserAuth.Role == 1)
+                        @if (string.Equals(ViewData["Role"], "1"))
                         {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Siswa" asp-action="Index">Siswa</a>
+                            </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Kelas" asp-action="Index">Kelas</a>
                             </li>

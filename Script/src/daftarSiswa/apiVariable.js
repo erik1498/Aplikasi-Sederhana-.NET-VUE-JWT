@@ -1,5 +1,6 @@
+import BaseUrl from "../BaseUrl";
 function baseSiswa(url = '') {
-    return "https://localhost:5001/Siswa/" + url;
+    return `${BaseUrl}/Siswa/${url}`;
 }
 
 export default baseSiswa;

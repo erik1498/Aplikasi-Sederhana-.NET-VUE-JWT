@@ -1,5 +1,6 @@
-function baseSiswa(url = '') {
-    return "https://localhost:5001/Kelas/" + url;
+import BaseUrl from "../BaseUrl";
+function baseKelas(url = '') {
+    return `${BaseUrl}/Kelas/${url}`;
 }
 
-export default baseSiswa;
+export default baseKelas;
