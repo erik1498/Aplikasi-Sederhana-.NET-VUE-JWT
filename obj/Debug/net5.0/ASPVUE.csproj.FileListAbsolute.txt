@@ -82,3 +82,10 @@ C:\Users\Erick Hene\Documents\dotnet\ASPVUE\bin\Debug\net5.0\Microsoft.AspNetCor
 C:\Users\Erick Hene\Documents\dotnet\ASPVUE\obj\Debug\net5.0\Razor\Views\Shared\_LayoutHome.cshtml.g.cs
 C:\Users\Erick Hene\Documents\dotnet\ASPVUE\obj\Debug\net5.0\Razor\Views\Jurusan\Index.cshtml.g.cs
 C:\Users\Erick Hene\Documents\dotnet\ASPVUE\obj\Debug\net5.0\Razor\Views\WaliKelas\Index.cshtml.g.cs
+C:\Users\Erick Hene\Documents\dotnet\ASPVUE\bin\Debug\net5.0\publish\web.config
+C:\Users\Erick Hene\Documents\dotnet\ASPVUE\bin\Debug\net5.0\publish\appsettings.Development.json
+C:\Users\Erick Hene\Documents\dotnet\ASPVUE\bin\Debug\net5.0\publish\appsettings.json
+C:\Users\Erick Hene\Documents\dotnet\ASPVUE\bin\Debug\net5.0\publish\ASPVUE.deps.json
+C:\Users\Erick Hene\Documents\dotnet\ASPVUE\bin\Debug\net5.0\publish\ASPVUE.runtimeconfig.json
+C:\Users\Erick Hene\Documents\dotnet\ASPVUE\bin\Debug\net5.0\publish\Script\package-lock.json
+C:\Users\Erick Hene\Documents\dotnet\ASPVUE\bin\Debug\net5.0\publish\Script\package.json

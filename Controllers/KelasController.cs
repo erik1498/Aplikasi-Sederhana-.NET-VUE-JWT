@@ -34,11 +34,7 @@ namespace ASPVUE.Controllers
                 string UserID = userClaims.FirstOrDefault(o => o.Type == ClaimTypes.PrimaryGroupSid).Value;
                 string Username = userClaims.FirstOrDefault(o => o.Type == ClaimTypes.NameIdentifier).Value;
                 int Role = int.Parse(userClaims.FirstOrDefault(o => o.Type == ClaimTypes.Role).Value);
-                var auth = this.AuthorizeRequest();
-                if (auth)
-                {
-                    
-                }if (HttpContext.Session.GetString("UserID") != UserID && HttpContext.Session.GetString("Username") != Username
+                if (HttpContext.Session.GetString("UserID") != UserID && HttpContext.Session.GetString("Username") != Username
                  && int.Parse(HttpContext.Session.GetString("Role")) != Role)
                 {
                     return false;
