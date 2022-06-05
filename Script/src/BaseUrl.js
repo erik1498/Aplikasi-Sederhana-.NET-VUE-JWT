@@ -1,2 +1,2 @@
-let BaseUrl = "http://erik1498-001-site1.htempurl.com/";
+let BaseUrl = "https://localhost:5001";
 export default BaseUrl

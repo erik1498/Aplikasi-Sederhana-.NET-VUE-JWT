@@ -2,7 +2,7 @@
 
 namespace ASPVUE.Migrations
 {
-    public partial class InitialMigration : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -35,19 +35,6 @@ namespace ASPVUE.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "WaliKelas",
-                columns: table => new
-                {
-                    WaliKelasID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    NamaWaliKelas = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_WaliKelas", x => x.WaliKelasID);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "KetuaJurusans",
                 columns: table => new
                 {
@@ -61,6 +48,26 @@ namespace ASPVUE.Migrations
                     table.PrimaryKey("PK_KetuaJurusans", x => x.KetuaJurusanID);
                     table.ForeignKey(
                         name: "FK_KetuaJurusans_Users_UserID",
+                        column: x => x.UserID,
+                        principalTable: "Users",
+                        principalColumn: "UserID",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "WaliKelas",
+                columns: table => new
+                {
+                    WaliKelasID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    NamaWaliKelas = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UserID = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_WaliKelas", x => x.WaliKelasID);
+                    table.ForeignKey(
+                        name: "FK_WaliKelas_Users_UserID",
                         column: x => x.UserID,
                         principalTable: "Users",
                         principalColumn: "UserID",
@@ -101,6 +108,7 @@ namespace ASPVUE.Migrations
                     SiswaID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     NamaSiswa = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    GambarSiswa = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     KelassKelasID = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
@@ -133,6 +141,11 @@ namespace ASPVUE.Migrations
                 name: "IX_Siswas_KelassKelasID",
                 table: "Siswas",
                 column: "KelassKelasID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_WaliKelas_UserID",
+                table: "WaliKelas",
+                column: "UserID");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -144,9 +157,6 @@ namespace ASPVUE.Migrations
                 name: "Siswas");
 
             migrationBuilder.DropTable(
-                name: "Users");
-
-            migrationBuilder.DropTable(
                 name: "Kelass");
 
             migrationBuilder.DropTable(
@@ -154,6 +164,9 @@ namespace ASPVUE.Migrations
 
             migrationBuilder.DropTable(
                 name: "WaliKelas");
+
+            migrationBuilder.DropTable(
+                name: "Users");
         }
     }
 }

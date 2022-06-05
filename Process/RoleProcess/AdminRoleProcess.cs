@@ -32,6 +32,10 @@ namespace ASPVUE.Process.RoleProcess
         {
             await _siswaProcess.SetKelas(setKelas);
         }
+        public async Task<Siswa> UploadImgSiswa(string Gambar, int SiswaID)
+        {
+            return await _siswaProcess.SetPathStringSiswa(Gambar, SiswaID);
+        }
 
         // WaliKelas
         public async Task<WaliKelas> CreateWaliKelas(SetWaliKelas setWaliKelas)
@@ -59,6 +63,7 @@ namespace ASPVUE.Process.RoleProcess
         }
         public async Task<bool> DeleteKelas(int id)
         {
+            await _waliKelasProcess.DeleteByIdKelas(id);
             return await _kelasProcess.Delete(id);
         }
         public async Task<Siswa> HapusSiswaInKelas(int id)

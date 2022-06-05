@@ -12,19 +12,24 @@ using Microsoft.AspNetCore.Authorization;
 using ASPVUE.Process.RoleProcess;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.StaticFiles;
+using System.IO;
 
 namespace ASPVUE.Controllers
 {
+    [RequestFormLimits(ValueCountLimit = 5000)]
     public class SiswaController : Controller
     {
         private readonly ILogger<SiswaController> _logger;
-
         public AdminRoleProcess _adminProcess { get; set; }
         public WaliKelasRoleProcess _waliKelasProcess { get; set; }
+        private static IWebHostEnvironment _webHostEnvironment { get; set; }
         
-        public SiswaController(ILogger<SiswaController> logger, ApplicationDbContext context)
+        public SiswaController(ILogger<SiswaController> logger, ApplicationDbContext context, IWebHostEnvironment webHostEnvironment)
         {
             _logger = logger;
+            _webHostEnvironment = webHostEnvironment;
             _adminProcess = new AdminRoleProcess(context);
             _waliKelasProcess = new WaliKelasRoleProcess(context);
         }
@@ -57,6 +62,61 @@ namespace ASPVUE.Controllers
             ViewData["TokenValue"] = tokenValue;
             ViewData["Role"] = HttpContext.Session.GetString("Role");
             return View();
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> Upload()
+        {
+            var auth = this.AuthorizeRequest();
+            if (auth)
+            {
+                if (int.Parse(HttpContext.Session.GetString("Role")) == 1 && Request.Form.Files.Count() > 0)
+                {
+                    int SiswaId = int.Parse(Request.Form["SiswaID"][0]);
+                    var formFile = Request.Form.Files[0];
+                    if (formFile.Length > 0)
+                    {
+                        if (!Directory.Exists(_webHostEnvironment.WebRootPath + "\\ImagesSiswa\\"))
+                        {
+                            Directory.CreateDirectory(_webHostEnvironment.WebRootPath + "\\ImageSiswa\\");
+                        }
+                        
+                        using (FileStream fileStream = System.IO.File.Create(_webHostEnvironment.WebRootPath + "\\ImageSiswa\\" + formFile.FileName))
+                        {
+                            await formFile.CopyToAsync(fileStream);
+                            await fileStream.FlushAsync();
+                        }
+                    }
+                    return Ok(await _adminProcess.UploadImgSiswa(formFile.FileName, SiswaId));
+
+                }
+                return BadRequest("Akun Anda Tidak Diizinkan");
+            }
+            return Unauthorized();
+        }
+
+        [HttpGet]
+        [Authorize]
+        public IActionResult ImageSource(GetSource getSource)
+        {
+            var auth = this.AuthorizeRequest();
+            if (auth)
+            {
+                if (int.Parse(HttpContext.Session.GetString("Role")) == 1)
+                {
+                    string path = _webHostEnvironment.WebRootPath + "\\ImageSiswa\\";
+                    var filePath = path +""+ getSource.sourcename;
+                    if (System.IO.File.Exists(filePath))
+                    {
+                        byte[] b = System.IO.File.ReadAllBytes(filePath);
+                        return File(b, "image/jpg");
+                    }
+                    return NotFound();
+                }
+                return BadRequest("Akun Anda Tidak Diizinkan");
+            }
+            return Unauthorized();
         }
 
         [HttpGet]

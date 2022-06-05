@@ -69,5 +69,13 @@ namespace ASPVUE.Process.ParentProcess
         {
             return await _context.Siswas.Where(x => x.NamaSiswa.Contains(siswa.NamaSiswa)).ToListAsync();
         }
+
+        public async Task<Siswa> SetPathStringSiswa(string Gambar, int SiswaID)
+        {
+            var exist = await this.GetId(SiswaID);
+            exist.GambarSiswa = Gambar;
+            await _context.SaveChangesAsync();
+            return exist;
+        }
     }
 }

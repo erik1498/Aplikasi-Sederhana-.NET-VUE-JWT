@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using ASPVUE.Data;
 using ASPVUE.Models;
 using ASPVUE.Process.DataProcess;
-using ASPVUE.Rules;
 using ASPVUE.Rules.Output;
 
 namespace ASPVUE.Process.RoleProcess
@@ -53,7 +52,7 @@ namespace ASPVUE.Process.RoleProcess
             foreach (var item in walikelas)
             {
                 var kelas = await _kelasProcess.GetIdByWaliKelasID(item.WaliKelasID);
-                daftarWaliKelas.Add(new WaliKelasDTO{
+                daftarWaliKelas.Add(new WaliKelasDTO {
                     NamaWaliKelas = item.NamaWaliKelas,
                     WaliKelasID = item.WaliKelasID,
                     KelasID = kelas.KelasID,

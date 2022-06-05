@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASPVUE.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220530142207_Initial Migration")]
-    partial class InitialMigration
+    [Migration("20220605141700_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -91,6 +91,9 @@ namespace ASPVUE.Migrations
                         .HasColumnType("int")
                         .UseIdentityColumn();
 
+                    b.Property<string>("GambarSiswa")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int?>("KelassKelasID")
                         .HasColumnType("int");
 
@@ -136,7 +139,12 @@ namespace ASPVUE.Migrations
                     b.Property<string>("NamaWaliKelas")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("UserID")
+                        .HasColumnType("int");
+
                     b.HasKey("WaliKelasID");
+
+                    b.HasIndex("UserID");
 
                     b.ToTable("WaliKelas");
                 });
@@ -172,6 +180,15 @@ namespace ASPVUE.Migrations
                         .HasForeignKey("KelassKelasID");
 
                     b.Navigation("Kelass");
+                });
+
+            modelBuilder.Entity("ASPVUE.Models.WaliKelas", b =>
+                {
+                    b.HasOne("ASPVUE.Models.User", "user")
+                        .WithMany()
+                        .HasForeignKey("UserID");
+
+                    b.Navigation("user");
                 });
 #pragma warning restore 612, 618
         }

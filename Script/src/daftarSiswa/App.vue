@@ -44,11 +44,18 @@
     </div>
     <div v-if="!datashow">
             <div class="row">
-                <div class="col-12 my-3">
+                <div class="col-12 mt-3">
                     <div class="form-group">
                         <label for="NamaSiswa">Nama Siswa</label>
                         <input type="text" class="form-control" v-model="NamaSiswa" autocomplete="off">
                         <p v-if="Error['NamaSiswa']" class="text-danger">* {{ Error['NamaSiswa'] }}</p>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="uploadImageInput">
+                        <label for="files">Files</label>
+                        <input type="file" accept=".jpg" id="files" autocomplete="off" @change="fileManager($event.target.files)">
+                        <img width="100" id="gambarSiswa">
                     </div>
                 </div>
                 <div class="col-6">
@@ -79,7 +86,8 @@ export default {
             SiswaID:0,
             searchKey:"",
             role:role,
-            Error:{}
+            Error:{},
+            file:null,
         }
     },
     components:{
@@ -93,6 +101,10 @@ export default {
             this.SiswaID = 0
             this.Error = {}
         },
+        uploadToggle(){
+            this.uploadFile = true,
+            this.datashow = false
+        },
         editToggle(idSiswaSelect){
             this.datashow = !this.datashow
             this.title = this.datashow ? "Daftar Siswa" : "Edit Siswa"
@@ -104,7 +116,24 @@ export default {
             }).then(res => {
                 this.NamaSiswa = res.data.NamaSiswa
                 this.SiswaID = res.data.SiswaID
+                this.getFileResource(res.data.GambarSiswa)
             })
+        },
+        getFileResource(filename){
+            axios.get(baseSiswa(`ImageSource?sourcename=${filename}`), {
+                headers:{
+                    "Authorization" : `Bearer ${token}`
+                },
+                responseType:'blob'
+            }).then((res) => {
+                let imageElement = document.getElementById('gambarSiswa')
+                var reader = new window.FileReader();
+                reader.readAsDataURL(res.data); 
+                reader.onload = function() {
+                    var imageDataUrl = reader.result;
+                    imageElement.setAttribute("src", imageDataUrl);
+                }
+            });
         },
         hapusSiswa(idSiswaSelect){
             axios.delete(baseSiswa(`Delete/${idSiswaSelect}`), {
@@ -119,16 +148,20 @@ export default {
                 }
             })
         },
+        fileManager(e){
+            this.file = e
+            document.getElementById('gambarSiswa').setAttribute("src", URL.createObjectURL(this.file[0]));
+        },
         simpanSiswa(){
             let data = {
                 SiswaID : this.SiswaID,
-                NamaSiswa: this.NamaSiswa
+                NamaSiswa: this.NamaSiswa,
             }
             this.title = "Daftar Siswa"
             if (data.SiswaID > 0) {
                 axios.put(baseSiswa(`Edit?area=Siswa`), querystring.stringify(data), {
                     headers:{
-                        "Authorization" : `Bearer ${token}`
+                        "Authorization" : `Bearer ${token}`,
                     }
                 }).then(res => {
                     this.changeSiswa(res);
@@ -139,10 +172,10 @@ export default {
             }else{
                 axios.post(baseSiswa(`Create?area=Siswa`), querystring.stringify(data), {
                     headers:{
-                        "Authorization" : `Bearer ${token}`
+                        "Authorization" : `Bearer ${token}`,
                     }
                 }).then(res => {
-                   this.addSiswa(res)
+                    this.addSiswa(res)
                     this.datashow = !this.datashow
                 }).catch((error) => {
                     this.createError(error);
@@ -190,12 +223,32 @@ export default {
                     return
                 }
             })
+            this.uploadFile(res.data.siswaID)
         },
         addSiswa(res){
             this.siswa.push({
                 NamaSiswa:res.data.NamaSiswa,
                 SiswaID:res.data.SiswaID
             })
+            this.uploadFile(res.data.SiswaID)
+        },
+        uploadFile(SiswaID){
+            if (this.file) {
+                let f = new FormData()
+                f.append('files', this.file[0])
+                f.append('SiswaID', SiswaID)
+
+                axios.post(baseSiswa(`Upload/${SiswaID}?area=Siswa`), f, {
+                    headers:{
+                        "Authorization" : `Bearer ${token}`,
+                        "Content-Type": "multipart/form-data",
+                    }
+                }).then(res => {
+                    console.log(res.data)
+                }).catch((error) => {
+                    this.createError(error);
+                })
+            }
         }
     },
     created(){
@@ -210,6 +263,26 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 
+    .uploadImageInput{
+        position: relative;
+    }
+
+    .uploadImageInput input{
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        top: 0;
+        opacity: 0;
+    }
+    
+    .uploadImageInput img{
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+    }
 </style>

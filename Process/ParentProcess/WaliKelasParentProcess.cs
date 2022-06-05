@@ -66,5 +66,12 @@ namespace ASPVUE.Process.ParentProcess
         {
             return await _context.WaliKelas.Where(w => w.user.UserID.Equals(userID)).FirstOrDefaultAsync();
         }
+
+        public async Task DeleteByIdKelas(int idKelas)
+        {
+            var exist = await _context.Kelass.Include(k => k.waliKelas).Where(k => k.KelasID.Equals(idKelas)).FirstOrDefaultAsync();
+            _context.WaliKelas.Remove(exist.waliKelas);
+            await _context.SaveChangesAsync();
+        }
     }
 }

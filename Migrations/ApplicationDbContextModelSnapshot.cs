@@ -89,6 +89,9 @@ namespace ASPVUE.Migrations
                         .HasColumnType("int")
                         .UseIdentityColumn();
 
+                    b.Property<string>("GambarSiswa")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int?>("KelassKelasID")
                         .HasColumnType("int");
 
